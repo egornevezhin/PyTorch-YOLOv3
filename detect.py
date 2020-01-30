@@ -17,6 +17,8 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 from torch.autograd import Variable
 
+import cv2
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.ticker import NullLocator
@@ -98,10 +100,10 @@ if __name__ == "__main__":
         print("(%d) Image: '%s'" % (img_i, path))
 
         # Create plot
-        img = np.array(Image.open(path))
-        plt.figure()
-        fig, ax = plt.subplots(1)
-        ax.imshow(img)
+        img = cv2.imread(path)
+        # plt.figure()
+        # fig, ax = plt.subplots(1)
+        # ax.imshow(img)
 
         # Draw bounding boxes and labels of detections
         if detections is not None:
@@ -119,23 +121,26 @@ if __name__ == "__main__":
 
                 color = bbox_colors[int(np.where(unique_labels == int(cls_pred))[0])]
                 # Create a Rectangle patch
-                bbox = patches.Rectangle((x1, y1), box_w, box_h, linewidth=2, edgecolor=color, facecolor="none")
+                # bbox = patches.Rectangle((x1, y1), box_w, box_h, linewidth=1, edgecolor=color, facecolor="none")
                 # Add the bbox to the plot
-                ax.add_patch(bbox)
+                # ax.add_patch(bbox)
+                cv2.rectangle(img, (x1, y1), (x1+box_w, y1+box_h), (255,0,0), 2)
+                cv2.putText(img, classes[int(cls_pred)],(x1, y1), cv2.FONT_HERSHEY_COMPLEX,0.5,(255,0,0),1)
                 # Add label
-                plt.text(
-                    x1,
-                    y1,
-                    s=classes[int(cls_pred)],
-                    color="white",
-                    verticalalignment="top",
-                    bbox={"color": color, "pad": 0},
-                )
+                # plt.text(
+                #     x1,
+                #     y1,
+                #     s=classes[int(cls_pred)],
+                #     color="white",
+                #     verticalalignment="top",
+                #     bbox={"color": color, "pad": 0},
+                # )
 
         # Save generated image with detections
-        plt.axis("off")
-        plt.gca().xaxis.set_major_locator(NullLocator())
-        plt.gca().yaxis.set_major_locator(NullLocator())
+        # plt.axis("off")
+        # plt.gca().xaxis.set_major_locator(NullLocator())
+        # plt.gca().yaxis.set_major_locator(NullLocator())
         filename = path.split("/")[-1].split(".")[0]
-        plt.savefig(f"output/{filename}.png", bbox_inches="tight", pad_inches=0.0)
-        plt.close()
+        cv2.imwrite(f"output/{filename}.png", img)
+        # plt.savefig(f"output/{filename}.png", dpi=300)#bbox_inches="tight", pad_inches=0.0)
+        # plt.close()
